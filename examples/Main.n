@@ -1,0 +1,3 @@
+@ Prints passed objects to `stdout`.
+@ Takes only `Number` and `String` types.
+print "Hello world"
