@@ -1,6 +1,6 @@
-use crate::backend::defaults::OPERATORS;
-
 use std::fmt::{Debug, Display, Formatter, Result};
+
+use crate::backend::defaults::OPERATORS;
 
 #[derive(Clone, Copy)]
 pub struct Char {
@@ -80,5 +80,22 @@ impl Debug for Char {
 impl Display for Char {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{}", &self.reference)
+    }
+}
+
+pub struct Position {
+    line: usize,
+    column: usize
+}
+
+impl Position {
+    pub fn new(line: usize, column: usize) -> Self {
+        Position { line, column }
+    }
+}
+
+impl Display for Position {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "{}:{}", &self.line, &self.column)
     }
 }

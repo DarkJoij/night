@@ -1,5 +1,7 @@
 use std::fmt::{Debug, Display, Formatter, Result};
 
+use crate::backend::lexer::Position;
+
 #[derive(Debug)]
 pub enum TokenType {
     // Data types:
@@ -20,22 +22,28 @@ pub enum TokenType {
     Broken(String)
 }
 
+// This should be checked later, as it
+// may not be skipped by various linters.
 impl Display for TokenType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            TokenType::Broken(object) => write!(f, "{}", object),
-            _ => <Self as Debug>::fmt(&self, f)
+            TokenType::Broken(object) => write!(f, "{object}"),
+            _ => <Self as Debug>::fmt(self, f)
         }
     }
 }
 
 pub struct Token {
     text: String,
-    pd_type: TokenType
+    pd_type: TokenType,
+    // position: Position
 }
 
 impl Token {
-    pub fn new(text: String, pd_type: TokenType) -> Self {
+    pub fn new(
+        text: String, pd_type: TokenType,
+        // line: usize, column: usize
+    ) -> Self {
         Token { text, pd_type }
     }
 }

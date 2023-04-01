@@ -1,8 +1,8 @@
-use crate::{spawn_night_error, if_debug};
+use crate::{spawn_syntax_error, spawn_float_error, if_debug};
 use crate::backend::lexer::{
     Char,
-    LexicalAssertions,
-    LineManager
+    Cursor,
+    LexicalAssertions
 };
 use crate::backend::tokens::{TokenType, Token};
 use crate::backend::defaults::{
@@ -10,24 +10,24 @@ use crate::backend::defaults::{
     define_identifier_type
 };
 
-pub struct Lexer {
+pub struct Lexer<'a> {
     code: Vec<Char>,
+    cursor: &'a Cursor,
     position: usize,
-    tokens: Vec<Token>,
-    line_manager: LineManager
+    tokens: Vec<Token>
 }
 
-impl Lexer {
-    pub fn new(code_ref: &[u8]) -> Self {
+impl<'a> Lexer<'a> {
+    pub fn new(code_ref: &[u8], cursor: &'a Cursor) -> Self {
         let code = code_ref.iter()
             .map(Char::new)
             .collect();
 
         Lexer {
-            code, 
+            code,
+            cursor,
             position: 0, 
             tokens: Vec::new(),
-            line_manager: LineManager::new(code_ref)
         }
     }
 
@@ -54,8 +54,8 @@ impl Lexer {
                 self.position += 1;
             }
             else {
-                let error_line = self.line_manager.get_current_line(&self.position);
-                spawn_night_error!(">>> {error_line}\nInvalid character found: {current:?}.");
+                let (_position, line) = self.cursor.get_current(&self.position);
+                spawn_syntax_error!("\n  {line}\n  Invalid character found: {current:?}.");
             }
         }
 
@@ -85,7 +85,7 @@ impl Lexer {
         loop {
             if current.equal('.') {
                 if buffer.contains('.') {
-                    spawn_night_error!(
+                    spawn_float_error!(
                         "Invalid floating point number at position: {}.", &self.position
                     );
                 }

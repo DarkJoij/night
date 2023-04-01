@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! spawn_night_error {
-    ($($arg:tt)*) => {{
-        eprintln!($($arg)*);
+    ($e_type:expr, $($arg:tt)*) => {{
+        eprintln!("{}: {}", $e_type, format!($($arg)*));
         std::process::exit(0);
     }};
 }

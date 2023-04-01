@@ -1,10 +1,9 @@
-use crate::spawn_night_error;
-
 use std::env::args;
 use std::fs::read;
 use std::process::exit;
 
-// Later it will be used to manage command line arguments.
+use crate::{spawn_al_error, spawn_read_error};
+
 pub struct Argv {
     reference: Vec<String>
 }
@@ -22,7 +21,7 @@ impl Default for Argv {
             .collect();
 
         if argv.len() == 1 {
-            spawn_night_error!("Too few arguments passed. At least 2 were expected.");
+            spawn_al_error!("Too few arguments passed. At least 2 were expected.");
         }
 
         Argv { reference: argv }
@@ -39,6 +38,6 @@ pub fn read_file(path: &String) -> Vec<u8> {
 
             c
         },
-        Err(_) => spawn_night_error!("Failed to read file: {path}.")
+        Err(_) => spawn_read_error!("Failed to read file: {path}.")
     }
 }
