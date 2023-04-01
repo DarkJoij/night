@@ -82,20 +82,3 @@ impl Display for Char {
         write!(f, "{}", &self.reference)
     }
 }
-
-pub struct Position {
-    line: usize,
-    column: usize
-}
-
-impl Position {
-    pub fn new(line: usize, column: usize) -> Self {
-        Position { line, column }
-    }
-}
-
-impl Display for Position {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{}:{}", &self.line, &self.column)
-    }
-}

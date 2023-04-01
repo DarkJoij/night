@@ -1,5 +1,5 @@
-use crate::backend::tokens::TokenType;
 use crate::backend::lexer::Char;
+use crate::backend::tokens::TokenType;
 
 #[allow(dead_code)]
 pub const IGNORE_CHARS: [char; 2] = [

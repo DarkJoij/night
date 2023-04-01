@@ -1,7 +1,7 @@
-use crate::{spawn_syntax_error, spawn_float_error, if_debug};
+use crate::{if_debug, spawn_syntax_error, spawn_float_error};
 use crate::backend::lexer::{
     Char,
-    Cursor,
+    LineManager,
     LexicalAssertions
 };
 use crate::backend::tokens::{TokenType, Token};
@@ -12,22 +12,22 @@ use crate::backend::defaults::{
 
 pub struct Lexer<'a> {
     code: Vec<Char>,
-    cursor: &'a Cursor,
     position: usize,
-    tokens: Vec<Token>
+    tokens: Vec<Token>,
+    line_manager: &'a LineManager
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(code_ref: &[u8], cursor: &'a Cursor) -> Self {
+    pub fn new(code_ref: &[u8], line_manager: &'a LineManager) -> Self {
         let code = code_ref.iter()
             .map(Char::new)
             .collect();
 
         Lexer {
             code,
-            cursor,
             position: 0, 
             tokens: Vec::new(),
+            line_manager
         }
     }
 
@@ -54,8 +54,8 @@ impl<'a> Lexer<'a> {
                 self.position += 1;
             }
             else {
-                let (_position, line) = self.cursor.get_current(&self.position);
-                spawn_syntax_error!("\n  {line}\n  Invalid character found: {current:?}.");
+                let cursor = self.line_manager.get_cursor(self.position);
+                spawn_syntax_error!("{cursor}\nInvalid character found: {current:?}.");
             }
         }
 
@@ -63,7 +63,14 @@ impl<'a> Lexer<'a> {
     }
 
     fn add_token(&mut self, text: String, pd_type: TokenType) {
-        self.tokens.push(Token::new(text, pd_type));
+        let mut length = text.len();
+
+        if pd_type == TokenType::String {
+            length += 2;
+        }
+
+        let position = self.line_manager.get_position(self.position - length);
+        self.tokens.push(Token::new(text, pd_type, position));
     }
 
     fn peek(&self) -> Char {
@@ -106,7 +113,6 @@ impl<'a> Lexer<'a> {
         let mut current = self.next();
 
         loop {
-            // Must be checked. It may not resolve infinity loop.
             if current.equal('"') || current.is_eof() {
                 break;
             } 

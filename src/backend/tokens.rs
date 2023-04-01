@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display, Formatter, Result};
 
 use crate::backend::lexer::Position;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenType {
     // Data types:
     Number,
@@ -36,21 +36,18 @@ impl Display for TokenType {
 pub struct Token {
     text: String,
     pd_type: TokenType,
-    // position: Position
+    position: Position
 }
 
 impl Token {
-    pub fn new(
-        text: String, pd_type: TokenType,
-        // line: usize, column: usize
-    ) -> Self {
-        Token { text, pd_type }
+    pub fn new(text: String, pd_type: TokenType, position: Position) -> Self {
+        Token { text, pd_type, position }
     }
 }
 
 #[cfg(debug_assertions)]
 impl Debug for Token {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "<{:?}, {}>", &self.text, &self.pd_type)
+        write!(f, "<{:?}, {} ~{}>", &self.text, &self.pd_type, &self.position)
     }
 }

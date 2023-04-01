@@ -1,7 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 
 use crate::spawn_core_error;
-use crate::backend::lexer::Position;
 
 fn is_last(last: &[char], symbol: &char) -> bool {
     symbol == last.last()
@@ -39,53 +38,88 @@ fn transform_code(code_ref: &[u8]) -> Vec<String> {
     lines
 }
 
-pub struct Line<'a> {
+pub struct Position {
     number: usize,
-    text: &'a str
+    column: usize
 }
 
-impl<'a> Line<'a> {
-    pub fn new(number: usize, text: &'a str) -> Self {
-        Line { number, text: text.trim() }
+impl Position {
+    pub fn new(number: usize, column: usize) -> Self {
+        Position {
+            number: number + 1, // Cause indexes starts from 0.
+            column: column + 1
+        }
     }
 }
 
-impl Display for Line<'_> {
+impl Display for Position {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        // Here it is also necessary to apply
-        // color formatting in the future.
-        write!(f, "{} | {}", &self.number, &self.text)
+        write!(f, "{}:{}", &self.number, &self.column)
     }
 }
 
-pub struct Cursor {
+pub struct Cursor<'a> {
+    pub line: &'a str,
+    pub position: Position
+}
+
+impl<'a> Cursor<'a> {
+    pub fn new(line: &'a str, number: usize, column: usize) -> Self {
+        Cursor {
+            line,
+            position: Position::new(number, column)
+        }
+    }
+}
+
+impl Display for Cursor<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "{} | {}", &self.position, &self.line)
+    }
+}
+
+pub struct LineManager {
     code: Vec<String>
 }
 
-impl Cursor {
+impl LineManager {
     pub fn new(code_ref: &[u8]) -> Self {
-        Cursor {
+        LineManager {
             code: transform_code(code_ref)
         }
     }
 
-    pub fn get_current(&self, position: &usize) -> (Position, Line<'_>) {
-        let mut line_number = 1;
-        let mut c_position = *position;
+    // dry.
+    pub fn get_position(&self, mut column: usize) -> Position {
+        let mut number = 0;
 
         for line in self.code.iter() {
-            if c_position < line.len() {
-                return (
-                    Position::new(line_number, c_position),
-                    Line::new(line_number, line)
-                );
+            if column < line.len() {
+                return Position::new(number, column);
             }
             else {
-                line_number += 1;
-                c_position -= line.len();
+                number += 1;
+                column -= line.len();
             }
         }
 
-        spawn_core_error!("Failed to access the {} index.", position)
+        spawn_core_error!("P: Failed to access the {} index.", column)
+    }
+
+    // dry.
+    pub fn get_cursor(&self, mut column: usize) -> Cursor<'_> {
+        let mut number = 1;
+
+        for line in self.code.iter() {
+            if column < line.len() {
+                return Cursor::new(line, number, column);
+            }
+            else {
+                number += 1;
+                column -= line.len();
+            }
+        }
+
+        spawn_core_error!("C: Failed to access the {} index.", column)
     }
 }
