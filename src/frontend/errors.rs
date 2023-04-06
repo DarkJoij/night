@@ -1,13 +1,14 @@
 use std::fmt::{Debug, Display, Formatter, Result};
 
 #[derive(Debug)]
-#[allow(clippy::enum_variant_names)]
+// #[allow(clippy::enum_variant_names)]
 pub enum NightBuiltInErrorType {
     CoreError,
     SyntaxError,
     FloatError,
     ArgsLenError,
-    ReadError
+    ReadError,
+    NameError
 }
 
 // This should be checked later, as it
@@ -61,6 +62,15 @@ macro_rules! spawn_read_error {
     ($($arg:tt)*) => {
         $crate::spawn_night_error!(
             $crate::frontend::errors::NightBuiltInErrorType::ReadError, $($arg)*
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! spawn_name_error {
+    ($($arg:tt)*) => {
+        $crate::spawn_night_error!(
+            $crate::frontend::errors::NightBuiltInErrorType::NameError, $($arg)*
         )
     };
 }

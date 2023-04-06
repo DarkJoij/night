@@ -10,6 +10,17 @@ macro_rules! spawn_night_error {
 macro_rules! if_debug {
     ($($body:tt)*) => {{
         #[cfg(debug_assertions)]
-        $($body)*
+        {
+            $($body)*
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! if_daily {
+    ($($body:tt)*) => {{
+        if cfg!(feature = "daily") {
+            $($body)*
+        }
     }};
 }
