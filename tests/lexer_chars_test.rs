@@ -5,6 +5,7 @@ use night::backend::lexer::{Char, LexicalAssertions};
 static NIGHT_REF: [u8; 6] = [
     110, 105, 103, 104, 116, 0
 ];
+
 static NIGHT_CHARS: [char; 6] = [
     'n', 'i', 'g', 'h', 't', '\0'
 ];

@@ -1,6 +1,6 @@
-use std::fmt::{Debug, Display, Formatter, Result};
-
 use crate::backend::defaults::OPERATORS;
+
+use std::fmt::{Debug, Display, Formatter, Result};
 
 #[derive(Clone, Copy)]
 pub struct Char {
@@ -11,10 +11,11 @@ pub trait LexicalAssertions {
     fn is_numeric(&self) -> bool;
     fn is_quote(&self) -> bool;
     fn is_operator(&self) -> bool;
+    fn is_doc_comment(&self) -> bool;
+    fn is_comment(&self) -> bool;
     fn is_reserved_keyword(&self) -> bool;
     fn is_identifier(&self) -> bool;
     fn is_whitespace(&self) -> bool;
-    fn is_comment(&self) -> bool;
     fn is_eof(&self) -> bool;
     fn equal(&self, other: char) -> bool;
 }
@@ -40,6 +41,14 @@ impl LexicalAssertions for Char {
         OPERATORS.contains(&self.reference)
     }
 
+    fn is_doc_comment(&self) -> bool {
+        self.reference == '!'
+    }
+
+    fn is_comment(&self) -> bool {
+        self.reference == '@'
+    }
+
     // Must be implemented later.
     fn is_reserved_keyword(&self) -> bool {
         todo!()
@@ -48,17 +57,13 @@ impl LexicalAssertions for Char {
     fn is_identifier(&self) -> bool {
         self.reference == '_'
             || self.reference.is_uppercase()
-            || self.reference.is_lowercase() 
+            || self.reference.is_lowercase()
     }
 
     fn is_whitespace(&self) -> bool {
         self.reference == ' '
             || self.reference == '\r'
             || self.reference == '\n'
-    }
-
-    fn is_comment(&self) -> bool {
-        self.reference == '@'
     }
 
     fn is_eof(&self) -> bool {

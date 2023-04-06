@@ -1,6 +1,6 @@
-use std::fmt::{Display, Formatter, Result};
-
 use crate::spawn_core_error;
+
+use std::fmt::{Display, Formatter, Result};
 
 fn is_last(last: &[char], symbol: &char) -> bool {
     symbol == last.last()
@@ -46,8 +46,7 @@ pub struct Position {
 impl Position {
     pub fn new(number: usize, column: usize) -> Self {
         Position {
-            number: number + 1, // Cause indexes starts from 0.
-            column: column + 1
+            number, column: column + 1
         }
     }
 }
@@ -74,7 +73,7 @@ impl<'a> Cursor<'a> {
 
 impl Display for Cursor<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{} | {}", &self.position, &self.line)
+        write!(f, "{} | {}", &self.position.number, &self.line)
     }
 }
 
@@ -91,7 +90,7 @@ impl LineManager {
 
     // dry.
     pub fn get_position(&self, mut column: usize) -> Position {
-        let mut number = 0;
+        let mut number = 1;
 
         for line in self.code.iter() {
             if column < line.len() {

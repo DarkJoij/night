@@ -1,6 +1,6 @@
-use std::fmt::{Debug, Display, Formatter, Result};
-
 use crate::backend::lexer::Position;
+
+use std::fmt::{Debug, Display, Formatter, Result};
 
 #[derive(Debug, PartialEq)]
 pub enum TokenType {
@@ -8,8 +8,8 @@ pub enum TokenType {
     Number,
     String,
     // Identifiers:
-    Const,
-    Variable,
+    ConstantIdentifier,
+    VariableIdentifier,
     // Operators:
     Assignment,
     Addition,
@@ -18,6 +18,7 @@ pub enum TokenType {
     Division,
     // User important:
     Comment,
+    DocComment,
     // Core important:
     Broken(String)
 }

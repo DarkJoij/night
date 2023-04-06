@@ -1,11 +1,6 @@
 use crate::backend::lexer::Char;
 use crate::backend::tokens::TokenType;
 
-#[allow(dead_code)]
-pub const IGNORE_CHARS: [char; 2] = [
-    '\r', '\n'
-];
-
 pub const OPERATORS: [char; 5] = [
     '=', '+', '-', '*', '/'
 ];
@@ -17,10 +12,10 @@ pub const RESERVED_KEYWORDS: [String; 0] = [
 
 pub fn define_identifier_type(character: &Char) -> TokenType {
     if character.reference.is_uppercase() {
-        return TokenType::Const
+        return TokenType::ConstantIdentifier
     }
     else if character.reference.is_lowercase() {
-        return TokenType::Variable
+        return TokenType::VariableIdentifier
     }
     
     TokenType::Broken(character.reference.to_string())
@@ -33,6 +28,14 @@ pub fn define_operator_type(character: &Char) -> TokenType {
         '-' => TokenType::Subtraction, 
         '*' => TokenType::Multiplication, 
         '/' => TokenType::Division,
+        _ => TokenType::Broken(character.reference.to_string())
+    }
+}
+
+pub fn define_comment_type(character: &Char) -> TokenType {
+    match character.reference {
+        '@' => TokenType::Comment,
+        '!' => TokenType::DocComment,
         _ => TokenType::Broken(character.reference.to_string())
     }
 }

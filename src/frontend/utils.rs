@@ -1,8 +1,8 @@
+use crate::{spawn_al_error, spawn_read_error};
+
 use std::env::args;
 use std::fs::read;
 use std::process::exit;
-
-use crate::{spawn_al_error, spawn_read_error};
 
 pub struct Argv {
     reference: Vec<String>

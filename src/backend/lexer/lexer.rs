@@ -7,7 +7,8 @@ use crate::backend::lexer::{
 use crate::backend::tokens::{TokenType, Token};
 use crate::backend::defaults::{
     define_operator_type, 
-    define_identifier_type
+    define_identifier_type,
+    define_comment_type
 };
 
 pub struct Lexer<'a> {
@@ -55,7 +56,7 @@ impl<'a> Lexer<'a> {
             }
             else {
                 let cursor = self.line_manager.get_cursor(self.position);
-                spawn_syntax_error!("{cursor}\nInvalid character found: {current:?}.");
+                spawn_syntax_error!("\n{cursor}\nInvalid character found: {current:?}.");
             }
         }
 
@@ -73,11 +74,15 @@ impl<'a> Lexer<'a> {
         self.tokens.push(Token::new(text, pd_type, position));
     }
 
-    fn peek(&self) -> Char {
-        match self.code.get(self.position) {
+    fn peek_from(&self, forward_on: usize) -> Char {
+        match self.code.get(self.position + forward_on) {
             Some(c) => *c,
             None => Char::new(&0)
         }
+    }
+
+    fn peek(&self) -> Char {
+        self.peek_from(0)
     }
 
     fn next(&mut self) -> Char {
@@ -177,6 +182,16 @@ impl<'a> Lexer<'a> {
     fn lex_comment(&mut self) {
         let mut buffer = String::new();
         let mut current = self.peek();
+        let next = self.peek_from(1);
+
+        if !next.is_comment() && !next.is_doc_comment() {
+            let cursor = self.line_manager.get_cursor(self.position);
+
+            spawn_syntax_error!(
+                "\n{cursor}\nInvalid comment declaration at {}.",
+                cursor.position
+            );
+        }
 
         loop {
             buffer.push(current.reference);
@@ -188,7 +203,7 @@ impl<'a> Lexer<'a> {
         }
 
         if_debug! {
-            self.add_token(buffer, TokenType::Comment);
+            self.add_token(buffer, define_comment_type(&next));
         }
     }
 }

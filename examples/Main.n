@@ -1,3 +1,5 @@
-@ Prints passed objects to `stdout`.
-@ Takes only `Number` and `String` types.
-print "Hello world"
+@! Prints passed objects to `stdout`.
+@! Takes only `Number` and `String` types.
+
+message = "Hello world"
+print message
