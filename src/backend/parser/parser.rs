@@ -1,16 +1,30 @@
+use crate::backend::ast::Expression;
 use crate::backend::tokens::Token;
 
-pub struct Parser<'a> {
-    tokens: &'a Vec<Token>
+use std::fmt::Debug;
+
+pub struct Parser<'a, T, O>
+where
+    T: Debug,
+    O: Debug + Default
+{
+    tokens: &'a Vec<Token>,
+    expressions: Vec<Expression<T, O>>
 }
 
-impl<'a> Parser<'a> {
+impl<'a, T, O> Parser<'a, T, O>
+where
+    T: Debug,
+    O: Debug + Default
+{
     pub fn new(tokens: &'a Vec<Token>) -> Self {
-        Parser { tokens }
+        Parser {
+            tokens,
+            expressions: Vec::new()
+        }
     }
 
-    pub fn parse(&self) -> &Token {
-        let x = self.tokens.get(1);
-        x.unwrap()
+    pub fn parse(&self) -> &Vec<Expression<T, O>> {
+        &self.expressions
     }
 }

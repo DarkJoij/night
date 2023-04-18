@@ -8,7 +8,9 @@ pub enum NightBuiltInErrorType {
     FloatError,
     ArgsLenError,
     ReadError,
-    NameError
+    NameError,
+    TypeError,
+    OperatorError
 }
 
 // This should be checked later, as it
@@ -71,6 +73,24 @@ macro_rules! spawn_name_error {
     ($($arg:tt)*) => {
         $crate::spawn_night_error!(
             $crate::frontend::errors::NightBuiltInErrorType::NameError, $($arg)*
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! spawn_operator_error {
+    ($($arg:tt)*) => {
+        $crate::spawn_night_error!(
+            $crate::frontend::errors::NightBuiltInErrorType::OperatorError, $($arg)*
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! spawn_type_error {
+    ($($arg:tt)*) => {
+        $crate::spawn_night_error!(
+            $crate::frontend::errors::NightBuiltInErrorType::TypeError, $($arg)*
         )
     };
 }

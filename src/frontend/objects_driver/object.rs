@@ -1,3 +1,6 @@
+//! In my opinion, it should be refactored,
+//! since the quality of the code is low.
+
 use crate::spawn_float_error;
 
 use std::fmt::{Debug, Display, Formatter, Result};
@@ -6,13 +9,15 @@ use std::fmt::{Debug, Display, Formatter, Result};
 pub enum NightObjectType {
     String,
     Number,
-    Custom(String)
+    Struct(String)
 }
 
+// This should be checked later, as it
+// may not be skipped by various linters.
 impl Display for NightObjectType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            NightObjectType::Custom(literal) => write!(f, "{literal}"),
+            NightObjectType::Struct(literal) => write!(f, "{literal}"),
             _ => <Self as Debug>::fmt(self, f)
         }
     }
@@ -20,20 +25,15 @@ impl Display for NightObjectType {
 
 pub struct NightObject {
     text: String,
-    identifier: String,
-    final_type: NightObjectType
+    final_type: NightObjectType,
+
+    pub identifier: String
 }
 
-pub trait DefaultObjectMethods {
-    type InnerOfCustom;
-
-    fn as_string(&self) -> String;
+pub trait TypeInference {
     fn as_number(&self) -> f64;
-    fn as_custom_type(&self) -> Self::InnerOfCustom;
-
-    fn get_text(&self) -> String;
-    fn get_identifier(&self) -> String;
-    fn get_final_type(&self) -> NightObjectType;
+    fn as_string(&self) -> String;
+    fn as_struct(&self) -> NightObjectType;
 }
 
 impl NightObject {
@@ -42,16 +42,12 @@ impl NightObject {
     ) -> Self {
         NightObject { text, identifier, final_type }
     }
-}
 
-impl DefaultObjectMethods for NightObject {
-    type InnerOfCustom = String;
-
-    fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String {
         self.text.clone()
     }
 
-    fn as_number(&self) -> f64 {
+    pub fn as_number(&self) -> f64 {
         match self.text.parse::<f64>() {
             Ok(n) => n,
             Err(n) => spawn_float_error!("Invalid number provided: {n}.")
@@ -59,20 +55,8 @@ impl DefaultObjectMethods for NightObject {
     }
 
     // Must be implemented later.
-    fn as_custom_type(&self) -> Self::InnerOfCustom {
+    pub fn as_custom_type(&self) -> String {
         todo!()
-    }
-
-    fn get_text(&self) -> String {
-        self.text.clone()
-    }
-
-    fn get_identifier(&self) -> String {
-        self.identifier.clone()
-    }
-
-    fn get_final_type(&self) -> NightObjectType {
-        self.final_type.clone()
     }
 }
 
