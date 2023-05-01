@@ -1,18 +1,6 @@
 use crate::frontend::objects_driver::NightObject;
 
-#[derive(Debug, PartialEq)] // TODO: Replace me with `Display`.
-pub enum ExpressionType {
-    Unary,
-    Binary,
-    Numeric,
-    Recursive
-}
-
-pub enum StatementType {
-    Assignment,
-    Println,
-    Print
-}
+use std::fmt::{Debug, Display, Formatter, Result};
 
 #[derive(Debug)]
 pub enum ExpressionCallback {
@@ -22,18 +10,42 @@ pub enum ExpressionCallback {
     Typed(NightObject)
 }
 
-pub trait NumericExpression<T> {
-    fn execute_numeric(&self) -> T;
+#[derive(Debug, Clone, PartialEq)]
+pub enum ExpressionType {
+    Void,
+    Unary,
+    Binary,
+    Numeric
 }
 
-pub trait UnaryExpression<T> {
-    fn execute_unary(&self) -> T;
+impl Display for ExpressionType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        <Self as Debug>::fmt(self, f)
+    }
 }
 
-pub trait BinaryExpression<T> {
-    fn execute_binary(&self) -> T;
+#[derive(Debug)]
+pub enum ExpressionResult {
+    Void,
+    Numeric(f64),
+    Literal(String)
+}
+
+impl Display for ExpressionResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        use ExpressionResult::*;
+
+        match self {
+            Numeric(number) => write!(f, "{number}"),
+            Literal(string) => write!(f, "{string}"),
+            _ => <Self as Debug>::fmt(self, f)
+        }
+    }
 }
 
 pub trait DefaultExpression {
-    fn execute(&self) -> ExpressionCallback;
+    fn execute_numeric(&self) -> f64;
+    fn execute_unary(&self) -> f64;
+    fn execute_binary(&self) -> f64;
+    fn execute(&self) -> ExpressionResult;
 }

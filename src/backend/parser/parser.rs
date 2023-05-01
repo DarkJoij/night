@@ -1,22 +1,12 @@
 use crate::backend::ast::Expression;
 use crate::backend::tokens::Token;
 
-use std::fmt::Debug;
-
-pub struct Parser<'a, T, O>
-where
-    T: Debug,
-    O: Debug + Default
-{
+pub struct Parser<'a> {
     tokens: &'a Vec<Token>,
-    expressions: Vec<Expression<T, O>>
+    expressions: Vec<Expression>
 }
 
-impl<'a, T, O> Parser<'a, T, O>
-where
-    T: Debug,
-    O: Debug + Default
-{
+impl<'a> Parser<'a> {
     pub fn new(tokens: &'a Vec<Token>) -> Self {
         Parser {
             tokens,
@@ -24,7 +14,7 @@ where
         }
     }
 
-    pub fn parse(&self) -> &Vec<Expression<T, O>> {
+    pub fn parse(&self) -> &Vec<Expression> {
         &self.expressions
     }
 }
