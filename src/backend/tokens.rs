@@ -2,7 +2,7 @@ use crate::backend::lexer::Position;
 
 use std::fmt::{Debug, Display, Formatter, Result};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum TokenType {
     // Data types:
     Number,
@@ -35,6 +35,7 @@ impl Display for TokenType {
     }
 }
 
+#[derive(Clone)]
 pub struct Token {
     position: Position,
 

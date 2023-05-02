@@ -1,5 +1,5 @@
-use crate::backend::lexer::Char;
-use crate::backend::tokens::TokenType;
+use crate::backend::lexer::{Char, Position};
+use crate::backend::tokens::{TokenType, Token};
 
 pub const OPERATORS: [char; 5] = [
     '=', '+', '-', '*', '/'
@@ -9,6 +9,12 @@ pub const OPERATORS: [char; 5] = [
 pub const RESERVED_KEYWORDS: [String; 0] = [
     // Must be filled with 'print' and 'println' for 28.03.2023.
 ];
+
+pub const EOF_TOKEN: Token = Token::new(
+    String::new(),
+    TokenType::Eof,
+    Position::new(usize::MAX, usize::MAX - 1)
+);
 
 pub fn define_identifier_type(character: &Char) -> TokenType {
     if character.reference.is_uppercase() {

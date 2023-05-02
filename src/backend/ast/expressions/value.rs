@@ -1,9 +1,9 @@
-use crate::{spawn_core_error, spawn_type_error};
 use crate::backend::ast::{
     DefaultExpression,
     Expression,
     ExpressionResult
 };
+use crate::{spawn_core_error, spawn_type_error};
 
 use std::fmt::{Display, Formatter, Result};
 

@@ -2,13 +2,9 @@ mod backend;
 mod frontend;
 mod macros;
 
+use crate::backend::ast::DefaultExpression;
 use crate::backend::lexer::{LineManager, Lexer};
-use crate::frontend::objects_driver::{
-    DriverInstruments,
-    NightObjectsDriver,
-    NightObjectType,
-    NightObject
-};
+use crate::backend::parser::Parser;
 use crate::frontend::utils::{Argv, read_file};
 
 fn main() {
@@ -23,24 +19,17 @@ fn main() {
         println!("Tokens:\n{tokens:#?}\n");
     }
 
-    if_daily! {
-        let zero = NightObject::new(
-            String::from("0"),
-            String::from("zero"),
-            NightObjectType::Number
-        );
-        let one = NightObject::new(
-            String::from("1"),
-            String::from("one"),
-            NightObjectType::Number
-        );
+    let mut parser = Parser::new(&tokens, &line_manager);
+    let expressions = parser.parse();
 
-        let mut driver = NightObjectsDriver::default();
-        println!("{driver:?}");
+    if_debug! {
+        // Shiiiiiiit!
+        for expression in &expressions {
+            println!("{expression}");
+        }
 
-        driver.add(zero);
-        driver.add(one);
-
-        println!("{driver:?}");
+        for expression in expressions {
+            println!("{}", expression.execute());
+        }
     }
 }

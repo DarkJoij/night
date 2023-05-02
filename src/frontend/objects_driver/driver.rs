@@ -1,8 +1,8 @@
 //! Should be refactored, since the
 //! quality of the code here is low.
 
-use crate::spawn_name_error;
 use crate::frontend::objects_driver::NightObject;
+use crate::spawn_name_error;
 
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter, Result};
@@ -12,13 +12,7 @@ pub struct NightObjectsDriver {
     store: HashMap<String, NightObject>
 }
 
-// TODO: May be included in simple `impl` block.
-pub trait DriverInstruments {
-    fn add(&mut self, object: NightObject);
-    fn get(&self, identifier: String) -> &NightObject;
-}
-
-impl DriverInstruments for NightObjectsDriver {
+impl NightObjectsDriver {
     fn add(&mut self, object: NightObject) {
         self.store.insert(object.identifier.clone(), object); // TODO: Refactor `clone()` calling.
     }
@@ -43,12 +37,5 @@ impl Debug for NightObjectsDriver {
         }
 
         write!(f, "end.")
-    }
-}
-
-#[cfg(feature = "daily")]
-impl NightObjectsDriver {
-    pub fn del(&mut self, identifier: String) {
-        self.store.remove(&identifier);
     }
 }

@@ -1,4 +1,3 @@
-use crate::{if_debug, spawn_syntax_error, spawn_float_error};
 use crate::backend::lexer::{
     Char,
     LineManager,
@@ -10,6 +9,7 @@ use crate::backend::defaults::{
     define_identifier_type,
     define_comment_type
 };
+use crate::{if_debug, spawn_syntax_error, spawn_float_error};
 
 pub struct Lexer<'a> {
     code: Vec<Char>,
@@ -32,7 +32,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn lex(&mut self) -> &Vec<Token> {
+    pub fn lex(&mut self) -> Vec<Token> {
         while self.position < self.code.len() {
             let current = self.peek(0);
 
@@ -60,7 +60,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        &self.tokens
+        self.tokens.clone()
     }
 
     fn add_token(&mut self, text: String, pd_type: TokenType) {

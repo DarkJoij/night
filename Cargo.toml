@@ -1,6 +1,6 @@
 [package]
 name = "night"
-version = "0.4.623"
+version = "0.5.223"
 edition = "2021"
 authors = ["Dallas"]
 description = "A high-level statically typed interprited general-purpose language."

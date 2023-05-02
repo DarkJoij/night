@@ -1,10 +1,10 @@
-use crate::{spawn_float_error, spawn_operator_error};
 use crate::backend::ast::{
     DefaultExpression,
     ExpressionResult,
     ExpressionType,
     Value
 };
+use crate::{spawn_float_error, spawn_operator_error};
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -40,20 +40,20 @@ impl Expression {
         )
     }
 
-    pub fn unary(operand: Expression, operator: String) -> Self {
+    pub fn unary(operand: Expression, operator: &str) -> Self {
         Self::new(
             Value::Recursive(operand),
             Value::Void,
-            operator,
+            operator.to_owned(),
             ExpressionType::Unary
         )
     }
 
-    pub fn binary(left: Expression, right: Expression, operator: String) -> Self {
+    pub fn binary(left: Expression, right: Expression, operator: &str) -> Self {
         Self::new(
             Value::Recursive(left),
             Value::Recursive(right),
-            operator,
+            operator.to_owned(),
             ExpressionType::Binary
         )
     }
@@ -111,7 +111,7 @@ impl DefaultExpression for Expression {
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(
-            f, "({}: {}, {}, {})",
+            f, "({}: {}, {:?}, {})",
             &self.expression_type, &self.left, &self.operator, &self.right
         )
     }

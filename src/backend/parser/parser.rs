@@ -1,31 +1,40 @@
 use crate::backend::ast::Expression;
-use crate::backend::parser::EOF_TOKEN; // Must path be specified?
+use crate::backend::defaults::EOF_TOKEN;
+use crate::backend::lexer::LineManager;
 use crate::backend::tokens::{TokenType, Token};
 use crate::spawn_core_error;
 
 pub struct Parser<'a> {
     position: usize,
     tokens: &'a Vec<Token>,
-    expressions: Vec<Expression>
+    expressions: Vec<Expression>,
+    line_manager: &'a LineManager
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokens: &'a Vec<Token>) -> Self {
+    pub fn new(tokens: &'a Vec<Token>, line_manager: &'a LineManager) -> Self {
         Parser {
             position: 0,
             tokens,
-            expressions: Vec::new()
+            expressions: Vec::new(),
+            line_manager
         }
     }
 
-    pub fn parse(&self) -> &Vec<Expression> {
-        &self.expressions
+    pub fn parse(&mut self) -> Vec<Expression> {
+        let mut expressions = Vec::new();
+
+        while !self.match_type(TokenType::Eof) {
+            expressions.push(self.expression())
+        }
+
+        expressions
     }
 
-    fn get_token(&self, forward_on: usize) -> &Token {
+    fn get_token(&self, forward_on: usize) -> Token {
         match self.tokens.get(self.position + forward_on) {
-            None => &EOF_TOKEN,
-            Some(t) => t
+            None => EOF_TOKEN,
+            Some(t) => t.clone()
         }
     }
 
@@ -41,18 +50,54 @@ impl<'a> Parser<'a> {
     }
 
     fn expression(&mut self) -> Expression {
-        self.multiplicative()
+        self.additive()
     }
 
     fn additive(&mut self) -> Expression {
-        self.unary()
+        let mut expression = self.multiplicative();
+
+        loop {
+            // `expression` and `self.multiplicative()` may be replaced. Need to check.
+            if self.match_type(TokenType::Addition) {
+                expression = Expression::binary(expression, self.multiplicative(), "+");
+                continue;
+            }
+            if self.match_type(TokenType::Subtraction) {
+                expression = Expression::binary(expression, self.multiplicative(), "-");
+                continue;
+            }
+
+            break;
+        }
+
+        expression
     }
 
     fn multiplicative(&mut self) -> Expression {
-        self.unary()
+        let mut expression = self.unary();
+
+        loop {
+            // `expression` and `self.unary()` may be replaced. Need to check.
+            if self.match_type(TokenType::Multiplication) {
+                expression = Expression::binary(expression, self.unary(), "*");
+                continue;
+            }
+            if self.match_type(TokenType::Division) {
+                expression = Expression::binary(expression, self.unary(), "/");
+                continue;
+            }
+
+            break;
+        }
+
+        expression
     }
 
     fn unary(&mut self) -> Expression {
+        // if self.match_type(TokenType::Subtraction) {
+        //
+        // }
+
         self.primary()
     }
 

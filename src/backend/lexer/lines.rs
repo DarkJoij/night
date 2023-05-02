@@ -38,6 +38,7 @@ fn transform_code(code_ref: &[u8]) -> Vec<String> {
     lines
 }
 
+#[derive(Clone)]
 pub struct Position {
     number: usize,
     column: usize
