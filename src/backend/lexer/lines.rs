@@ -44,7 +44,8 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn new(number: usize, column: usize) -> Self {
+    // `const` may be removed.
+    pub const fn new(number: usize, column: usize) -> Self {
         Position {
             number, column: column + 1
         }

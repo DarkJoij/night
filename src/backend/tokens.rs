@@ -20,6 +20,7 @@ pub enum TokenType {
     Comment,
     DocComment,
     // Core important:
+    Eof,
     Broken(String)
 }
 
@@ -35,13 +36,15 @@ impl Display for TokenType {
 }
 
 pub struct Token {
-    text: String,
-    pd_type: TokenType,
-    position: Position
+    position: Position,
+
+    pub text: String,
+    pub pd_type: TokenType
 }
 
 impl Token {
-    pub fn new(text: String, pd_type: TokenType, position: Position) -> Self {
+    // `const` may be removed.
+    pub const fn new(text: String, pd_type: TokenType, position: Position) -> Self {
         Token { text, pd_type, position }
     }
 }

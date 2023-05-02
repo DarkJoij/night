@@ -1,10 +1,10 @@
+use crate::{spawn_float_error, spawn_operator_error};
 use crate::backend::ast::{
     DefaultExpression,
     ExpressionResult,
     ExpressionType,
-
+    Value
 };
-use crate::backend::ast::expressions::Value;
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -59,37 +59,36 @@ impl Expression {
     }
 }
 
+// Actually later this will be fully rewritten.
 impl DefaultExpression for Expression {
     fn execute_numeric(&self) -> f64 {
-        let string = self.left.unwrap_to_string();
+        let literal = self.left.unwrap_to_string();
 
-        match string.parse::<f64>() {
+        match literal.parse::<f64>() {
             Ok(n) => n,
-            // TODO: Switch to custom errors.
-            Err(_) => panic!("failed to parse string: {}.", &self.left)
+            Err(_) => spawn_float_error!("Invalid numeric expression: {}.", &self.left)
         }
     }
 
     fn execute_unary(&self) -> f64 {
-        let operand = self.left.unwrap_to_f64();
+        let value = self.left.get_f64_from_expr();
 
         match self.operator.as_str() {
-            "-" => -operand,
-            _ => operand
+            "-" => -value,
+            _ => value
         }
     }
 
     fn execute_binary(&self) -> f64 {
-        let left = self.left.unwrap_to_f64();
-        let right = self.right.unwrap_to_f64();
+        let left = self.left.get_f64_from_expr();
+        let right = self.right.get_f64_from_expr();
 
         match self.operator.as_str() {
             "+" => left + right,
             "-" => left - right,
             "*" => left * right,
             "/" => left / right,
-            // TODO: Switch to custom errors.
-            _ => panic!("Invalid operator: {}.", &self.operator)
+            _ => spawn_operator_error!("Invalid operator: {}.", &self.operator)
         }
     }
 

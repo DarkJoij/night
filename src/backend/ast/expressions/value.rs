@@ -1,4 +1,9 @@
-use crate::backend::ast::Expression;
+use crate::{spawn_core_error, spawn_type_error};
+use crate::backend::ast::{
+    DefaultExpression,
+    Expression,
+    ExpressionResult
+};
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -15,24 +20,51 @@ impl Value {
     pub fn unwrap_to_f64(&self) -> f64 {
         match self {
             Value::Numeric(number) => *number, // Might be replaced with `.clone()`.
-            // TODO: Switch to custom errors.
-            _ => panic!("failed to unwrap non-numeric value: {self}.")
+            _ => spawn_type_error!("Expected numeric expression instead of {self}.")
         }
     }
 
     pub fn unwrap_to_string(&self) -> String {
         match self {
             Value::Literal(string) => string.clone(),
-            // TODO: Switch to custom errors.
-            _ => panic!("failed to unwrap non-string value: {self}.")
+            _ => spawn_type_error!("Expected string expression instead of {self}.")
         }
     }
 
     pub fn unwrap_to_expression(&self) -> Expression {
         match self {
             Value::Recursive(expression) => expression.clone(),
-            // TODO: Switch to custom errors.
-            _ => panic!("failed to unwrap non-expression value: {self}.")
+            _ => spawn_type_error!("Expected some expression instead of {self}.")
+        }
+    }
+
+    pub fn get_f64_from_expr(&self) -> f64 {
+        let expression = self.unwrap_to_expression();
+
+        match expression.execute() {
+            ExpressionResult::Numeric(number) => number,
+            _ => spawn_core_error!("Failed to fetch numeric value: {self}.")
+        }
+    }
+
+    #[cfg(feature = "daily")]
+    pub fn get_string_from_expr(&self) -> String {
+        let expression = self.unwrap_to_expression();
+
+        match expression.execute() {
+            ExpressionResult::Literal(string) => string,
+            _ => spawn_core_error!("Failed to fetch string value: {self}.")
+        }
+    }
+
+    #[cfg(feature = "daily")]
+    pub fn get_child_from_expr(&self) -> Expression {
+        let expression = self.unwrap_to_expression();
+
+        match expression.execute() {
+            // Must be modified for actual types.
+            ExpressionResult::Some(child) => child,
+            _ => spawn_core_error!("Failed to fetch expression: {self}.")
         }
     }
 }
@@ -50,8 +82,7 @@ impl Display for Value {
     }
 }
 
-// #[cfg(tests)]
-#[allow(unused_imports)] // TODO: Remove after tests.
+#[cfg(tests)]
 mod tests {
     use crate::backend::ast::Expression;
     use super::Value;

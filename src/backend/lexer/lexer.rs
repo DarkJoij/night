@@ -34,7 +34,7 @@ impl<'a> Lexer<'a> {
 
     pub fn lex(&mut self) -> &Vec<Token> {
         while self.position < self.code.len() {
-            let current = self.peek();
+            let current = self.peek(0);
 
             if current.is_numeric() {
                 self.lex_number();
@@ -74,25 +74,21 @@ impl<'a> Lexer<'a> {
         self.tokens.push(Token::new(text, pd_type, position));
     }
 
-    fn peek_from(&self, forward_on: usize) -> Char {
+    fn peek(&self, forward_on: usize) -> Char {
         match self.code.get(self.position + forward_on) {
-            Some(c) => *c,
-            None => Char::new(&0)
+            None => Char::new(&0),
+            Some(c) => *c
         }
-    }
-
-    fn peek(&self) -> Char {
-        self.peek_from(0)
     }
 
     fn next(&mut self) -> Char {
         self.position += 1;
-        self.peek()
+        self.peek(0)
     }
 
     fn lex_number(&mut self) {
         let mut buffer = String::new();
-        let mut current = self.peek();
+        let mut current = self.peek(0);
 
         loop {
             if current.equal('.') {
@@ -132,7 +128,7 @@ impl<'a> Lexer<'a> {
 
     fn lex_identifier(&mut self) {
         let mut buffer = String::new();
-        let mut current = self.peek();
+        let mut current = self.peek(0);
         let preliminary_type = define_identifier_type(&current);
 
         loop {
@@ -160,7 +156,7 @@ impl<'a> Lexer<'a> {
     }
 
     fn lex_operator(&mut self) {
-        let current = self.peek();
+        let current = self.peek(0);
         let preliminary_type = define_operator_type(&current);
 
         self.position += 1;
@@ -181,8 +177,8 @@ impl<'a> Lexer<'a> {
 
     fn lex_comment(&mut self) {
         let mut buffer = String::new();
-        let mut current = self.peek();
-        let next = self.peek_from(1);
+        let mut current = self.peek(0);
+        let next = self.peek(1);
 
         if !next.is_comment() && !next.is_doc_comment() {
             let cursor = self.line_manager.get_cursor(self.position);

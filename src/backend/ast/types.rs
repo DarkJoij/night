@@ -18,6 +18,8 @@ pub enum ExpressionType {
     Numeric
 }
 
+// This should be checked later, as it
+// may not be skipped by various linters.
 impl Display for ExpressionType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         <Self as Debug>::fmt(self, f)
