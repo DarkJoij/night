@@ -4,15 +4,16 @@ use crate::backend::ast::{
     ExpressionType,
     Value
 };
+// use crate::backend::lexer::Position;
 use crate::{spawn_float_error, spawn_operator_error};
 
-use std::fmt::{Display, Formatter, Result};
+use std::fmt::{Debug, Formatter, Result};
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub struct Expression {
+    operator: String,
     left: Box<Value>,
     right: Box<Value>,
-    operator: String,
     expression_type: ExpressionType
 }
 
@@ -24,9 +25,9 @@ impl Expression {
         expression_type: ExpressionType
     ) -> Self {
         Expression {
+            operator,
             left: Box::new(left), // Might be replaced with `box x` if i'll switch to night builds.
             right: Box::new(right),
-            operator,
             expression_type
         }
     }
@@ -40,7 +41,7 @@ impl Expression {
         )
     }
 
-    pub fn unary(operand: Expression, operator: &str) -> Self {
+    pub fn unary(operator: &str, operand: Expression) -> Self {
         Self::new(
             Value::Recursive(operand),
             Value::Void,
@@ -49,7 +50,7 @@ impl Expression {
         )
     }
 
-    pub fn binary(left: Expression, right: Expression, operator: &str) -> Self {
+    pub fn binary(operator: &str, left: Expression, right: Expression) -> Self {
         Self::new(
             Value::Recursive(left),
             Value::Recursive(right),
@@ -108,15 +109,6 @@ impl DefaultExpression for Expression {
     }
 }
 
-impl Display for Expression {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(
-            f, "({}: {}, {:?}, {})",
-            &self.expression_type, &self.left, &self.operator, &self.right
-        )
-    }
-}
-
 impl Clone for Expression {
     fn clone(&self) -> Self {
         Expression {
@@ -125,5 +117,18 @@ impl Clone for Expression {
             operator: self.operator.clone(),
             expression_type: self.expression_type.clone()
         }
+    }
+}
+
+#[cfg(debug_assertions)]
+impl Debug for Expression {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "({}: {}", &self.expression_type, &self.left)?;
+
+        if !self.operator.is_empty() {
+            write!(f, ", {:?}, {}", &self.operator, &self.right)?;
+        }
+
+        write!(f, ")")
     }
 }

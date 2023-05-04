@@ -25,7 +25,7 @@ fn main() {
     if_debug! {
         // Shiiiiiiit!
         for expression in &expressions {
-            println!("{expression}");
+            println!("{expression:?}");
         }
 
         for expression in expressions {

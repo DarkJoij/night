@@ -16,6 +16,9 @@ pub enum TokenType {
     Subtraction,
     Multiplication,
     Division,
+    // Control:
+    LeftParenthesis,
+    RightParenthesis,
     // User important:
     Comment,
     DocComment,
@@ -29,7 +32,7 @@ pub enum TokenType {
 impl Display for TokenType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            TokenType::Broken(object) => write!(f, "{object}"),
+            TokenType::Broken(object) => write!(f, "Broken({object})"),
             _ => <Self as Debug>::fmt(self, f)
         }
     }
@@ -50,9 +53,15 @@ impl Token {
     }
 }
 
+impl Display for Token {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "{}", &self.text)
+    }
+}
+
 #[cfg(debug_assertions)]
 impl Debug for Token {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "<{:?}, {} ~{}>", &self.text, &self.pd_type, &self.position)
+        write!(f, "({}: {:?} | {})", &self.pd_type, &self.text, &self.position)
     }
 }

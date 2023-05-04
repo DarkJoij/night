@@ -7,7 +7,7 @@ use crate::{spawn_core_error, spawn_type_error};
 
 use std::fmt::{Display, Formatter, Result};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum Value {
     Void,
     Numeric(f64),
@@ -77,7 +77,7 @@ impl Display for Value {
             Void => write!(f, "void"),
             Numeric(number) => write!(f, "{number}"),
             Literal(string) => write!(f, "{string}"),
-            Recursive(expression) => write!(f, "{expression}")
+            Recursive(expression) => write!(f, "{expression:?}")
         }
     }
 }

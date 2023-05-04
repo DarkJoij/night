@@ -1,8 +1,8 @@
-use crate::backend::lexer::{Char, Position};
+use crate::backend::lexer::{Char, Position, is_lowercase, is_uppercase};
 use crate::backend::tokens::{TokenType, Token};
 
-pub const OPERATORS: [char; 5] = [
-    '=', '+', '-', '*', '/'
+pub const OPERATORS: [char; 7] = [
+    '=', '(', ')', '+', '-', '*', '/'
 ];
 
 #[allow(dead_code)]
@@ -16,20 +16,22 @@ pub const EOF_TOKEN: Token = Token::new(
     Position::new(usize::MAX, usize::MAX - 1)
 );
 
-pub fn define_identifier_type(character: &Char) -> TokenType {
-    if character.reference.is_uppercase() {
-        return TokenType::ConstantIdentifier
-    }
-    else if character.reference.is_lowercase() {
+pub fn define_identifier_type(buffer: &str) -> TokenType {
+    if is_lowercase(buffer) {
         return TokenType::VariableIdentifier
     }
+    else if is_uppercase(buffer) {
+        return TokenType::ConstantIdentifier
+    }
     
-    TokenType::Broken(character.reference.to_string())
+    TokenType::Broken(buffer.to_owned())
 }
 
 pub fn define_operator_type(character: &Char) -> TokenType {
     match character.reference {
-        '=' => TokenType::Assignment, 
+        '=' => TokenType::Assignment,
+        '(' => TokenType::LeftParenthesis,
+        ')' => TokenType::RightParenthesis,
         '+' => TokenType::Addition, 
         '-' => TokenType::Subtraction, 
         '*' => TokenType::Multiplication, 

@@ -1,14 +1,4 @@
-use crate::frontend::objects_driver::NightObject;
-
 use std::fmt::{Debug, Display, Formatter, Result};
-
-#[derive(Debug)]
-pub enum ExpressionCallback {
-    Void,
-    Numeric(f64),
-    Literal(String),
-    Typed(NightObject)
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExpressionType {

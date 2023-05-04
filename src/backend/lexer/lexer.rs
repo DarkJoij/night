@@ -1,8 +1,4 @@
-use crate::backend::lexer::{
-    Char,
-    LineManager,
-    LexicalAssertions
-};
+use crate::backend::lexer::{Char, LineManager};
 use crate::backend::tokens::{TokenType, Token};
 use crate::backend::defaults::{
     define_operator_type, 
@@ -129,7 +125,6 @@ impl<'a> Lexer<'a> {
     fn lex_identifier(&mut self) {
         let mut buffer = String::new();
         let mut current = self.peek(0);
-        let preliminary_type = define_identifier_type(&current);
 
         loop {
             buffer.push(current.reference);
@@ -142,6 +137,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
+        let preliminary_type = define_identifier_type(&buffer);
         self.add_token(buffer, preliminary_type)
 
         /*     

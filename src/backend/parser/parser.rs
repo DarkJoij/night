@@ -2,7 +2,7 @@ use crate::backend::ast::Expression;
 use crate::backend::defaults::EOF_TOKEN;
 use crate::backend::lexer::LineManager;
 use crate::backend::tokens::{TokenType, Token};
-use crate::spawn_core_error;
+use crate::spawn_syntax_error;
 
 pub struct Parser<'a> {
     position: usize,
@@ -57,13 +57,12 @@ impl<'a> Parser<'a> {
         let mut expression = self.multiplicative();
 
         loop {
-            // `expression` and `self.multiplicative()` may be replaced. Need to check.
             if self.match_type(TokenType::Addition) {
-                expression = Expression::binary(expression, self.multiplicative(), "+");
+                expression = Expression::binary("+", expression, self.multiplicative());
                 continue;
             }
             if self.match_type(TokenType::Subtraction) {
-                expression = Expression::binary(expression, self.multiplicative(), "-");
+                expression = Expression::binary("-", expression, self.multiplicative());
                 continue;
             }
 
@@ -77,13 +76,12 @@ impl<'a> Parser<'a> {
         let mut expression = self.unary();
 
         loop {
-            // `expression` and `self.unary()` may be replaced. Need to check.
             if self.match_type(TokenType::Multiplication) {
-                expression = Expression::binary(expression, self.unary(), "*");
+                expression = Expression::binary("*", expression, self.unary());
                 continue;
             }
             if self.match_type(TokenType::Division) {
-                expression = Expression::binary(expression, self.unary(), "/");
+                expression = Expression::binary("/", expression, self.unary());
                 continue;
             }
 
@@ -94,10 +92,11 @@ impl<'a> Parser<'a> {
     }
 
     fn unary(&mut self) -> Expression {
-        // if self.match_type(TokenType::Subtraction) {
-        //
-        // }
+        if self.match_type(TokenType::Subtraction) {
+            return Expression::unary("-", self.primary())
+        }
 
+        self.match_type(TokenType::Addition); // Must be checked!
         self.primary()
     }
 
@@ -107,7 +106,13 @@ impl<'a> Parser<'a> {
         if self.match_type(TokenType::Number) {
             return Expression::numeric(current_token.text);
         }
+        if self.match_type(TokenType::LeftParenthesis) {
+            let expression = self.expression();
+            self.match_type(TokenType::RightParenthesis);
 
-        spawn_core_error!("Failed to pass `primary` function.")
+            return expression;
+        }
+
+        spawn_syntax_error!("Invalid syntax: {current_token}")
     }
 }
