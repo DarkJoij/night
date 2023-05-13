@@ -19,6 +19,8 @@ pub enum TokenType {
     // Control:
     LeftParenthesis,
     RightParenthesis,
+    // Reserved keywords:
+    Println,
     // User important:
     Comment,
     DocComment,
@@ -27,12 +29,15 @@ pub enum TokenType {
     Broken(String)
 }
 
-// This should be checked later, as it
-// may not be skipped by various linters.
 impl Display for TokenType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        use TokenType::*;
+
         match self {
-            TokenType::Broken(object) => write!(f, "Broken({object})"),
+            ConstantIdentifier => write!(f, "constant (NAME)"),
+            VariableIdentifier => write!(f, "variable (name)"),
+            Assignment  => write!(f, "assignment (=)"),
+            Broken(object) => write!(f, "Broken({object})"),
             _ => <Self as Debug>::fmt(self, f)
         }
     }

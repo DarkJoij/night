@@ -1,4 +1,4 @@
-use crate::backend::ast::Expression;
+use crate::backend::ast::{Expression, Statement};
 use crate::backend::defaults::EOF_TOKEN;
 use crate::backend::lexer::LineManager;
 use crate::backend::tokens::{TokenType, Token};
@@ -19,11 +19,11 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&mut self) -> Vec<Expression> {
+    pub fn parse(&mut self) -> Vec<Statement> {
         let mut expressions = Vec::new();
 
         while !self.match_type(TokenType::Eof) {
-            expressions.push(self.expression())
+            expressions.push(self.statement())
         }
 
         expressions
@@ -45,6 +45,38 @@ impl<'a> Parser<'a> {
 
         self.position += 1;
         true
+    }
+
+    fn consume(&mut self, expected_type: TokenType) -> bool {
+        let compared = self.match_type(expected_type.clone());
+
+        if !compared {
+            spawn_syntax_error!(
+                "Expected {expected_type} expression instead of '{}'.", self.get_token(0)
+            );
+        }
+
+        compared
+    }
+
+    fn statement(&mut self) -> Statement {
+        if self.match_type(TokenType::Println) {
+            return Statement::println(self.expression());
+        }
+
+        self.assignment_statement()
+    }
+
+    fn assignment_statement(&mut self) -> Statement {
+        let current_token = self.get_token(0);
+
+        if self.consume(TokenType::VariableIdentifier)
+            && self.consume(TokenType::Assignment)
+        {
+            return Statement::assignment(current_token.text, self.expression());
+        }
+
+        spawn_syntax_error!("Invalid expression: {current_token}")
     }
 
     fn expression(&mut self) -> Expression {
@@ -101,9 +133,19 @@ impl<'a> Parser<'a> {
     fn primary(&mut self) -> Expression {
         let current_token = self.get_token(0);
 
+        if self.match_type(TokenType::String) {
+            return Expression::literal(current_token.text);
+        }
         if self.match_type(TokenType::Number) {
             return Expression::numeric(current_token.text);
         }
+        if self.match_type(TokenType::ConstantIdentifier) {
+            return Expression::constant(current_token.text);
+        }
+        if self.match_type(TokenType::VariableIdentifier) {
+            return Expression::variable(current_token.text);
+        }
+
         if self.match_type(TokenType::LeftParenthesis) {
             let expression = self.expression();
             self.match_type(TokenType::RightParenthesis);
@@ -111,6 +153,6 @@ impl<'a> Parser<'a> {
             return expression;
         }
 
-        spawn_syntax_error!("Invalid syntax: {current_token}")
+        spawn_syntax_error!("Invalid syntax: {current_token:?}.")
     }
 }

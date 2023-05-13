@@ -41,6 +41,7 @@ impl Char {
 
     pub fn is_identifier(&self) -> bool {
         self.reference == '_'
+            || self.reference.is_numeric()
             || self.reference.is_uppercase()
             || self.reference.is_lowercase()
     }
@@ -75,7 +76,7 @@ impl Display for Char {
 
 pub fn is_lowercase(buffer: &str) -> bool {
     for character in buffer.chars() {
-        if !character.is_lowercase() && character != '_' {
+        if !character.is_lowercase() && !character.is_numeric() && character != '_'  {
             return false;
         }
     }
@@ -85,7 +86,7 @@ pub fn is_lowercase(buffer: &str) -> bool {
 
 pub fn is_uppercase(buffer: &str) -> bool {
     for character in buffer.chars() {
-        if !character.is_uppercase() && character != '_' {
+        if !character.is_uppercase() && !character.is_numeric() && character != '_' {
             return false;
         }
     }

@@ -1,8 +1,10 @@
 use crate::backend::ast::Expression;
+use crate::ub;
 
 use std::fmt::{Display, Formatter, Result};
 
-pub enum Container {
+pub enum ExpressionContainer {
+    Void, // Must be removed later.
     Atom {
         literal: String
     },
@@ -17,11 +19,21 @@ pub enum Container {
     }
 }
 
-impl Display for Container {
+impl ExpressionContainer {
+    pub fn unwrap_atom(&self) -> &String {
+        match self {
+            ExpressionContainer::Atom { literal } => literal,
+            _ => ub!("Expected identifier instead of {self}")
+        }
+    }
+}
+
+impl Display for ExpressionContainer {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        use Container::*;
+        use ExpressionContainer::*;
 
         match self {
+            Void => write!(f, "()"),
             Atom { literal } => write!(f, "{literal}"),
             Unary { operator, operand } => write!(f, "{operator}{operand}"),
             Binary { operator, left, right } => write!(f, "{left} {operator} {right}")

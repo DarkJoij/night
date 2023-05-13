@@ -4,6 +4,7 @@ mod macros;
 
 use crate::backend::lexer::{LineManager, Lexer};
 use crate::backend::parser::Parser;
+use crate::frontend::objects_driver::get_loaded_driver;
 use crate::frontend::utils::{Argv, read_file};
 
 fn main() {
@@ -14,20 +15,13 @@ fn main() {
     let mut lexer = Lexer::new(&code, &line_manager);
     let tokens = lexer.lex();
 
-    if_debug! {
-        println!("Tokens:\n{tokens:#?}\n");
-    }
+    // println!("Tokens:\n{tokens:#?}\n");
 
+    let mut driver = get_loaded_driver();
     let mut parser = Parser::new(&tokens, &line_manager);
-    let expressions = parser.parse();
+    let statements = parser.parse();
 
-    if_debug! {
-        for expression in &expressions {
-            println!("{expression}");
-        }
-
-        for expression in expressions {
-            println!("{}", expression.execute());
-        }
+    for statement in &statements {
+        statement.execute(&mut driver)
     }
 }

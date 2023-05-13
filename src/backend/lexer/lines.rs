@@ -1,4 +1,4 @@
-use crate::spawn_core_error;
+use crate::ub;
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -104,7 +104,7 @@ impl LineManager {
             }
         }
 
-        spawn_core_error!("P: Failed to access the {} index.", column)
+        ub!("P: Failed to access the {} index.", column)
     }
 
     // dry.
@@ -121,6 +121,6 @@ impl LineManager {
             }
         }
 
-        spawn_core_error!("C: Failed to access the {} index.", column)
+        ub!("C: Failed to access the {} index.", column)
     }
 }

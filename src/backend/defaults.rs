@@ -1,12 +1,20 @@
+use std::borrow::ToOwned;
 use crate::backend::lexer::{Char, Position, is_lowercase, is_uppercase};
 use crate::backend::tokens::{TokenType, Token};
+
+fn define_reserved_keyword_type(keyword: &str) -> TokenType {
+    match keyword {
+        "println" => TokenType::Println,
+        _ => TokenType::Broken(keyword.to_string())
+    }
+}
 
 pub const OPERATORS: [char; 7] = [
     '=', '(', ')', '+', '-', '*', '/'
 ];
 
-pub const RESERVED_KEYWORDS: [String; 0] = [
-    // Must be filled with 'print' and 'println' for 28.03.2023.
+pub const RESERVED_KEYWORDS: [&str; 1] = [
+    "println"
 ];
 
 pub const EOF_TOKEN: Token = Token::new(
@@ -17,6 +25,10 @@ pub const EOF_TOKEN: Token = Token::new(
 
 pub fn define_identifier_type(buffer: &str) -> TokenType {
     if is_lowercase(buffer) {
+        if RESERVED_KEYWORDS.contains(&buffer) {
+            return define_reserved_keyword_type(buffer);
+        }
+
         return TokenType::VariableIdentifier
     }
     else if is_uppercase(buffer) {

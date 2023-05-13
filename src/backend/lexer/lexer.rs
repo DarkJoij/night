@@ -110,9 +110,16 @@ impl<'a> Lexer<'a> {
         let mut current = self.next();
 
         loop {
+            if current.equal('\\') {
+                current = self.next();
+                buffer.push(current.reference);
+
+                current = self.next();
+                continue;
+            }
             if current.equal('"') || current.is_eof() {
                 break;
-            } 
+            }
 
             buffer.push(current.reference);
             current = self.next();
