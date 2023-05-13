@@ -5,7 +5,7 @@ use crate::backend::defaults::{
     define_identifier_type,
     define_comment_type
 };
-use crate::{if_debug, spawn_syntax_error, spawn_float_error};
+use crate::{if_daily, spawn_syntax_error, spawn_float_error};
 
 pub struct Lexer<'a> {
     code: Vec<Char>,
@@ -130,25 +130,13 @@ impl<'a> Lexer<'a> {
             buffer.push(current.reference);
             current = self.next();
 
-            // This not covers all target types.
-            // Must be refactored later.
             if !current.is_identifier() {
                 break;
             }
         }
 
         let preliminary_type = define_identifier_type(&buffer);
-        self.add_token(buffer, preliminary_type)
-
-        /*     
-        match preliminary_type {
-            TokenType::Broken(symbol) => {
-                // 'symbol' might be formatted with "{:?}".
-                spawn_night_error!("Invalid character ({symbol}) in position: {}.", &self.position);
-            },
-            _ => self.add_token(buffer, preliminary_type)
-        }
-        */
+        self.add_token(buffer, preliminary_type);
     }
 
     fn lex_operator(&mut self) {
@@ -157,18 +145,6 @@ impl<'a> Lexer<'a> {
 
         self.position += 1;
         self.add_token(current.to_string(), preliminary_type);
-
-        /* 
-        match preliminary_type {
-            TokenType::Broken(operator) => {
-                spawn_night_error!("Invalid operator ({operator}) at position {}.", &self.position);
-            },
-            _ => {
-                self.position += 1;
-                self.add_token(current.to_string(), preliminary_type);
-            }
-        }
-        */
     }
 
     fn lex_comment(&mut self) {
@@ -194,7 +170,7 @@ impl<'a> Lexer<'a> {
             }
         }
 
-        if_debug! {
+        if_daily! {
             self.add_token(buffer, define_comment_type(&next));
         }
     }

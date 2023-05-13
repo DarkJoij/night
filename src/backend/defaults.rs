@@ -5,7 +5,6 @@ pub const OPERATORS: [char; 7] = [
     '=', '(', ')', '+', '-', '*', '/'
 ];
 
-#[allow(dead_code)]
 pub const RESERVED_KEYWORDS: [String; 0] = [
     // Must be filled with 'print' and 'println' for 28.03.2023.
 ];

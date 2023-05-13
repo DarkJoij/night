@@ -2,7 +2,6 @@ mod backend;
 mod frontend;
 mod macros;
 
-use crate::backend::ast::DefaultExpression;
 use crate::backend::lexer::{LineManager, Lexer};
 use crate::backend::parser::Parser;
 use crate::frontend::utils::{Argv, read_file};
@@ -23,9 +22,8 @@ fn main() {
     let expressions = parser.parse();
 
     if_debug! {
-        // Shiiiiiiit!
         for expression in &expressions {
-            println!("{expression:?}");
+            println!("{expression}");
         }
 
         for expression in expressions {

@@ -7,7 +7,6 @@ use crate::spawn_syntax_error;
 pub struct Parser<'a> {
     position: usize,
     tokens: &'a Vec<Token>,
-    expressions: Vec<Expression>,
     line_manager: &'a LineManager
 }
 
@@ -16,7 +15,6 @@ impl<'a> Parser<'a> {
         Parser {
             position: 0,
             tokens,
-            expressions: Vec::new(),
             line_manager
         }
     }
@@ -96,7 +94,7 @@ impl<'a> Parser<'a> {
             return Expression::unary("-", self.primary())
         }
 
-        self.match_type(TokenType::Addition); // Must be checked!
+        self.match_type(TokenType::Addition);
         self.primary()
     }
 

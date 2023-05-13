@@ -1,134 +1,107 @@
 use crate::backend::ast::{
-    DefaultExpression,
-    ExpressionResult,
+    Container,
     ExpressionType,
-    Value
+    ExpressionResult
 };
-// use crate::backend::lexer::Position;
 use crate::{spawn_float_error, spawn_operator_error};
 
-use std::fmt::{Debug, Formatter, Result};
+use std::fmt::{Display, Formatter, Result};
 
-#[derive(PartialEq)]
 pub struct Expression {
-    operator: String,
-    left: Box<Value>,
-    right: Box<Value>,
-    expression_type: ExpressionType
+    expression_type: ExpressionType,
+    container: Box<Container>
 }
 
 impl Expression {
-    pub fn new(
-        left: Value,
-        right: Value,
-        operator: String,
-        expression_type: ExpressionType
-    ) -> Self {
+    pub fn new(expression_type: ExpressionType, container: Container) -> Self {
         Expression {
-            operator,
-            left: Box::new(left), // Might be replaced with `box x` if i'll switch to night builds.
-            right: Box::new(right),
-            expression_type
+            expression_type,
+            container: Box::new(container)
         }
     }
 
-    pub fn numeric(value: String) -> Self {
+    pub fn numeric(literal: String) -> Self {
         Self::new(
-            Value::Literal(value),
-            Value::Void,
-            String::new(),
-            ExpressionType::Numeric
+            ExpressionType::Numeric,
+            Container::Atom { literal }
         )
     }
 
     pub fn unary(operator: &str, operand: Expression) -> Self {
         Self::new(
-            Value::Recursive(operand),
-            Value::Void,
-            operator.to_owned(),
-            ExpressionType::Unary
+            ExpressionType::Numeric,
+            Container::Unary {
+                operator: operator.to_owned(),
+                operand
+            }
         )
     }
 
     pub fn binary(operator: &str, left: Expression, right: Expression) -> Self {
         Self::new(
-            Value::Recursive(left),
-            Value::Recursive(right),
-            operator.to_owned(),
-            ExpressionType::Binary
+            ExpressionType::Numeric,
+            Container::Binary {
+                operator: operator.to_owned(),
+                left,
+                right
+            }
         )
     }
-}
 
-// Actually later this will be fully rewritten.
-impl DefaultExpression for Expression {
-    fn execute_numeric(&self) -> f64 {
-        let literal = self.left.unwrap_to_string();
+    pub fn execute(&self) -> ExpressionResult {
+        use ExpressionType::*;
 
-        match literal.parse::<f64>() {
-            Ok(n) => n,
-            Err(_) => spawn_float_error!("Invalid numeric expression: {}.", &self.left)
-        }
-    }
-
-    fn execute_unary(&self) -> f64 {
-        let value = self.left.get_f64_from_expr();
-
-        match self.operator.as_str() {
-            "-" => -value,
-            _ => value
-        }
-    }
-
-    fn execute_binary(&self) -> f64 {
-        let left = self.left.get_f64_from_expr();
-        let right = self.right.get_f64_from_expr();
-
-        match self.operator.as_str() {
-            "+" => left + right,
-            "-" => left - right,
-            "*" => left * right,
-            "/" => left / right,
-            _ => spawn_operator_error!("Invalid operator: {}.", &self.operator)
-        }
-    }
-
-    fn execute(&self) -> ExpressionResult {
         match self.expression_type {
-            ExpressionType::Unary => {
-                ExpressionResult::Numeric(self.execute_unary())
-            },
-            ExpressionType::Binary => {
-                ExpressionResult::Numeric(self.execute_binary())
-            },
-            ExpressionType::Numeric => {
-                ExpressionResult::Numeric(self.execute_numeric())
-            },
-            _ => ExpressionResult::Void
+            Void => ExpressionResult::Void,
+            Numeric => ExpressionResult::Numeric(self.execute_numeric()),
+            Literal => ExpressionResult::Literal(self.execute_literal())
         }
+    }
+
+    fn execute_numeric(&self) -> f64 {
+        use Container::*;
+
+        match self.container.as_ref() {
+            Atom { literal } => {
+                match literal.parse::<f64>() {
+                    Ok(n) => n,
+                    Err(_) => spawn_float_error!("Invalid numeric expression: {}.", &literal)
+                }
+            },
+            Unary { operator, operand } => {
+                let value = operand.execute()
+                    .unwrap_to_f64();
+
+                match operator.as_str() {
+                    "-" => -value,
+                    _ => value
+                }
+            },
+            Binary { operator, left, right } => {
+                let left_value = left.execute()
+                    .unwrap_to_f64();
+                let right_value = right.execute()
+                    .unwrap_to_f64();
+
+                match operator.as_str() {
+                    "+" => left_value + right_value,
+                    "-" => left_value - right_value,
+                    "*" => left_value * right_value,
+                    "/" => left_value / right_value,
+                    _ => spawn_operator_error!("Invalid operator: {}.", &operator)
+                }
+            }
+        }
+    }
+
+    fn execute_literal(&self) -> String {
+        String::new()
     }
 }
 
-impl Clone for Expression {
-    fn clone(&self) -> Self {
-        Expression {
-            left: self.left.clone(),
-            right: self.right.clone(),
-            operator: self.operator.clone(),
-            expression_type: self.expression_type.clone()
-        }
-    }
-}
-
-#[cfg(debug_assertions)]
-impl Debug for Expression {
+/// Димка ты прав, тут лучше [`Display`].
+impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "({}: {}", &self.expression_type, &self.left)?;
-
-        if !self.operator.is_empty() {
-            write!(f, ", {:?}, {}", &self.operator, &self.right)?;
-        }
-
-        write!(f, ")")
+        write!(f, "{}", self.container)
     }
 }

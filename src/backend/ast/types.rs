@@ -1,19 +1,12 @@
+use crate::spawn_type_error;
+
 use std::fmt::{Debug, Display, Formatter, Result};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug)]
 pub enum ExpressionType {
     Void,
-    Unary,
-    Binary,
-    Numeric
-}
-
-// This should be checked later, as it
-// may not be skipped by various linters.
-impl Display for ExpressionType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        <Self as Debug>::fmt(self, f)
-    }
+    Numeric,
+    Literal
 }
 
 #[derive(Debug)]
@@ -23,21 +16,31 @@ pub enum ExpressionResult {
     Literal(String)
 }
 
+impl ExpressionResult {
+    pub fn unwrap_to_f64(&self) -> f64 {
+        match self {
+            // Might be replaced with `.clone()` calling.
+            ExpressionResult::Numeric(number) => *number,
+            _ => spawn_type_error!("Expected numeric expression instead of {self:?}")
+        }
+    }
+
+    pub fn unwrap_to_string(&self) -> String {
+        match self {
+            ExpressionResult::Literal(string) => string.clone(),
+            _ => spawn_type_error!("Expected string expression instead of {self:?}")
+        }
+    }
+}
+
 impl Display for ExpressionResult {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         use ExpressionResult::*;
 
         match self {
+            Void => write!(f, "()"),
             Numeric(number) => write!(f, "{number}"),
-            Literal(string) => write!(f, "{string}"),
-            _ => <Self as Debug>::fmt(self, f)
+            Literal(string) => write!(f, "{string}")
         }
     }
-}
-
-pub trait DefaultExpression {
-    fn execute_numeric(&self) -> f64;
-    fn execute_unary(&self) -> f64;
-    fn execute_binary(&self) -> f64;
-    fn execute(&self) -> ExpressionResult;
 }
