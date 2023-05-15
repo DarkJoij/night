@@ -4,7 +4,6 @@ use crate::ub;
 use std::fmt::{Display, Formatter, Result};
 
 pub enum ExpressionContainer {
-    Void, // Must be removed later.
     Atom {
         literal: String
     },
@@ -23,7 +22,7 @@ impl ExpressionContainer {
     pub fn unwrap_atom(&self) -> &String {
         match self {
             ExpressionContainer::Atom { literal } => literal,
-            _ => ub!("Expected identifier instead of {self}")
+            _ => ub!("Expected identifier instead of '{self}'.")
         }
     }
 }
@@ -33,7 +32,6 @@ impl Display for ExpressionContainer {
         use ExpressionContainer::*;
 
         match self {
-            Void => write!(f, "()"),
             Atom { literal } => write!(f, "{literal}"),
             Unary { operator, operand } => write!(f, "{operator}{operand}"),
             Binary { operator, left, right } => write!(f, "{left} {operator} {right}")

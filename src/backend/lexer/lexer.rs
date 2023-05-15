@@ -1,7 +1,9 @@
 use crate::backend::lexer::{Char, LineManager};
 use crate::backend::tokens::{TokenType, Token};
 use crate::backend::defaults::{
-    define_operator_type, 
+    COMPLEX_OPERATORS_ENDINGS,
+    define_operator_type,
+    define_complex_operator_type,
     define_identifier_type,
     define_comment_type
 };
@@ -148,10 +150,21 @@ impl<'a> Lexer<'a> {
 
     fn lex_operator(&mut self) {
         let current = self.peek(0);
-        let preliminary_type = define_operator_type(&current);
+        let next = self.peek(1);
+
+        let mut buffer = String::from(current.reference);
+
+        let preliminary_type = if COMPLEX_OPERATORS_ENDINGS.contains(&next.reference) {
+            buffer.push(next.reference);
+            self.position += 1;
+
+            define_complex_operator_type(&buffer)
+        } else {
+            define_operator_type(&current)
+        };
 
         self.position += 1;
-        self.add_token(current.to_string(), preliminary_type);
+        self.add_token(buffer, preliminary_type);
     }
 
     fn lex_comment(&mut self) {

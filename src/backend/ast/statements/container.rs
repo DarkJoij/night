@@ -1,15 +1,20 @@
-use crate::backend::ast::Expression;
+use crate::backend::ast::{Expression, Statement};
 
 use std::fmt::{Display, Formatter, Result};
 
 pub enum StatementContainer {
-    Void, // Must be remove later.
+    Void,
     Println {
         object: Expression
     },
     Assignment {
         identifier: String,
         object: Expression
+    },
+    IfElse {
+        condition: Expression,
+        if_statement: Statement,
+        else_statement: Statement
     }
 }
 
@@ -18,9 +23,18 @@ impl Display for StatementContainer {
         use StatementContainer::*;
 
         match self {
-            Void => write!(f, "()"),
-            Println { object } => write!(f, "println {object}"),
-            Assignment { identifier, object } => write!(f, "{identifier} = {object}")
+            Void => {
+                write!(f, "void")
+            },
+            Println { object } => {
+                write!(f, "println {object}")
+            },
+            Assignment { identifier, object } => {
+                write!(f, "{identifier} = {object}")
+            },
+            IfElse { condition, if_statement, else_statement } => {
+                write!(f, "if {condition} {{ {if_statement} }} else {{ {else_statement} }}")
+            }
         }
     }
 }

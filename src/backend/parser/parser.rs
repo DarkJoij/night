@@ -7,15 +7,13 @@ use crate::spawn_syntax_error;
 pub struct Parser<'a> {
     position: usize,
     tokens: &'a Vec<Token>,
-    line_manager: &'a LineManager
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(tokens: &'a Vec<Token>, line_manager: &'a LineManager) -> Self {
+    pub fn new(tokens: &'a Vec<Token>, _line_manager: &'a LineManager) -> Self {
         Parser {
             position: 0,
-            tokens,
-            line_manager
+            tokens
         }
     }
 
@@ -63,6 +61,9 @@ impl<'a> Parser<'a> {
         if self.match_type(TokenType::Println) {
             return Statement::println(self.expression());
         }
+        if self.match_type(TokenType::IfKeyword) {
+            return self.if_else_statement();
+        }
 
         self.assignment_statement()
     }
@@ -76,11 +77,58 @@ impl<'a> Parser<'a> {
             return Statement::assignment(current_token.text, self.expression());
         }
 
-        spawn_syntax_error!("Invalid expression: {current_token}")
+        spawn_syntax_error!("Invalid expression: {current_token:?}.")
+    }
+
+    fn if_else_statement(&mut self) -> Statement {
+        let condition = self.expression();
+        let if_statement = self.statement();
+        let else_statement = if self.match_type(TokenType::ElseKeyword) {
+            self.statement()
+        } else {
+            Statement::void()
+        };
+
+        Statement::if_else(condition, if_statement, else_statement)
     }
 
     fn expression(&mut self) -> Expression {
-        self.additive()
+        self.conditional()
+    }
+
+    fn conditional(&mut self) -> Expression {
+        let mut expression = self.additive();
+
+        loop {
+            if self.match_type(TokenType::Equal) {
+                expression = Expression::complex_boolean("==", expression, self.additive());
+                continue;
+            }
+            if self.match_type(TokenType::NotEqual) {
+                expression = Expression::complex_boolean("!=", expression, self.additive());
+                continue;
+            }
+            if self.match_type(TokenType::LessThan) {
+                expression = Expression::complex_boolean("<", expression, self.additive());
+                continue;
+            }
+            if self.match_type(TokenType::GreaterThan) {
+                expression = Expression::complex_boolean(">", expression, self.additive());
+                continue;
+            }
+            if self.match_type(TokenType::LessOrEqual) {
+                expression = Expression::complex_boolean("<=", expression, self.additive());
+                continue;
+            }
+            if self.match_type(TokenType::GreaterOrEqual) {
+                expression = Expression::complex_boolean(">=", expression, self.additive());
+                continue;
+            }
+
+            break;
+        }
+
+        expression
     }
 
     fn additive(&mut self) -> Expression {
@@ -125,6 +173,9 @@ impl<'a> Parser<'a> {
         if self.match_type(TokenType::Subtraction) {
             return Expression::unary("-", self.primary())
         }
+        if self.match_type(TokenType::Inversion) {
+            return Expression::boolean("!", self.primary())
+        }
 
         self.match_type(TokenType::Addition);
         self.primary()
@@ -133,9 +184,6 @@ impl<'a> Parser<'a> {
     fn primary(&mut self) -> Expression {
         let current_token = self.get_token(0);
 
-        if self.match_type(TokenType::String) {
-            return Expression::literal(current_token.text);
-        }
         if self.match_type(TokenType::Number) {
             return Expression::numeric(current_token.text);
         }
@@ -145,7 +193,9 @@ impl<'a> Parser<'a> {
         if self.match_type(TokenType::VariableIdentifier) {
             return Expression::variable(current_token.text);
         }
-
+        if self.match_type(TokenType::String) {
+            return Expression::literal(current_token.text);
+        }
         if self.match_type(TokenType::LeftParenthesis) {
             let expression = self.expression();
             self.match_type(TokenType::RightParenthesis);

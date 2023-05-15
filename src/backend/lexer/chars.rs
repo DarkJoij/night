@@ -34,11 +34,6 @@ impl Char {
         self.reference == '@'
     }
 
-    // Must be implemented later.
-    pub fn is_reserved_keyword(&self) -> bool {
-        todo!()
-    }
-
     pub fn is_identifier(&self) -> bool {
         self.reference == '_'
             || self.reference.is_numeric()

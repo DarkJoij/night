@@ -6,7 +6,8 @@ use std::fmt::{Debug, Display, Formatter, Result};
 pub enum NightValue {
     Void,
     Numeric(f64),
-    Literal(String)
+    Literal(String),
+    Boolean(bool)
 }
 
 impl NightValue {
@@ -24,6 +25,14 @@ impl NightValue {
             _ => ub!("Expected string expression instead of {self:?}.")
         }
     }
+
+    pub fn unwrap_to_bool(&self) -> bool {
+        match self {
+            // Might be replaced with `.clone()` calling.
+            NightValue::Boolean(boolean) => *boolean,
+            _ => ub!("Expected boolean expression instead of {self:?}.")
+        }
+    }
 }
 
 impl Display for NightValue {
@@ -33,7 +42,8 @@ impl Display for NightValue {
         match self {
             Void => write!(f, "void"),
             Numeric(number) => write!(f, "{number}"),
-            Literal(string) => write!(f, "{string}")
+            Literal(string) => write!(f, "{string}"),
+            Boolean(boolean) => write!(f, "{boolean}")
         }
     }
 }

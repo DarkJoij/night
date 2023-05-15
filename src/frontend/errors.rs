@@ -7,8 +7,8 @@ pub enum NightBuiltInErrorType {
     ArgsLenError,
     ReadError,
     NameError,
-    TypeError,
-    OperatorError
+    OperatorError,
+    TypeError
 }
 
 // This should be checked later, as it

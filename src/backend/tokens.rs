@@ -16,17 +16,33 @@ pub enum TokenType {
     Subtraction,
     Multiplication,
     Division,
+    LessThan,
+    GreaterThan,
+    // Complex operators:
+    Equal,
+    NotEqual,
+    LessOrEqual,
+    GreaterOrEqual,
     // Control:
+    Inversion,
+    Or,
+    And,
+    LogicalOr,
+    LogicalAnd,
     LeftParenthesis,
     RightParenthesis,
     // Reserved keywords:
     Println,
+    IfKeyword,
+    ElsIfKeyword,
+    ElseKeyword,
     // User important:
     Comment,
     DocComment,
     // Core important:
     Eof,
-    Broken(String)
+    Broken(String),
+    BooleanValue(bool)
 }
 
 impl Display for TokenType {

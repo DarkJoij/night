@@ -1,9 +1,8 @@
 a = 10
-b = 15
 
-c = a + b
+b = a + 1
 
-@@ C value:
-@@ 25
-println "C value:"
-println c
+if 1 == 1
+    println "1 is 1, basic math!"
+else
+    println "Actually unreachable branch"

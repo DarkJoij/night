@@ -3,10 +3,11 @@ use crate::frontend::objects_driver::{NightObjectsDriver, NightValue};
 
 use std::fmt::{Display, Formatter, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ExpressionType {
     Numeric,
     Literal,
+    Boolean,
     Constant,
     Variable
 }
@@ -42,8 +43,13 @@ impl Expression {
     }
 
     pub fn binary(operator: &str, left: Expression, right: Expression) -> Self {
+        use ExpressionType::*;
+
         Self::new(
-            ExpressionType::Numeric,
+            match left.expression_type {
+                Literal => Literal,
+                _ => Numeric
+            },
             ExpressionContainer::Binary {
                 operator: operator.to_owned(),
                 left,
@@ -63,6 +69,27 @@ impl Expression {
         Self::new(
             ExpressionType::Variable,
             ExpressionContainer::Atom { literal: identifier }
+        )
+    }
+
+    pub fn boolean(operator: &str, operand: Expression) -> Self {
+        Self::new(
+            ExpressionType::Boolean,
+            ExpressionContainer::Unary {
+                operator: operator.to_owned(),
+                operand
+            }
+        )
+    }
+
+    pub fn complex_boolean(operator: &str, left: Expression, right: Expression) -> Self {
+        Self::new(
+            ExpressionType::Boolean,
+            ExpressionContainer::Binary {
+                operator: operator.to_owned(),
+                left,
+                right
+            }
         )
     }
 
