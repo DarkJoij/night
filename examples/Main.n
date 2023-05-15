@@ -2,7 +2,7 @@ a = 10
 
 b = a + 1
 
-if 1 == 1
-    println "1 is 1, basic math!"
+if b >= 11
+    println "`b` is 11, basic math!"
 else
     println "Actually unreachable branch"
