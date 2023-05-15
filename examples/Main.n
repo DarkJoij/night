@@ -1,8 +1,7 @@
 a = 10
-
 b = a + 1
 
-if b >= 11
-    println "`b` is 11, basic math!"
-else
+if b != 11
     println "Actually unreachable branch"
+else if b == 11
+    println "`b` is equal 11, basic math!"
