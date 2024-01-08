@@ -58,6 +58,9 @@ impl<'a> Parser<'a> {
     }
 
     fn statement(&mut self) -> Statement {
+        if self.match_type(TokenType::Input) {
+            return self.input_statement();
+        }
         if self.match_type(TokenType::Println) {
             return Statement::println(self.expression());
         }
@@ -66,6 +69,12 @@ impl<'a> Parser<'a> {
         }
 
         self.assignment_statement()
+    }
+
+    fn input_statement(&mut self) -> Statement {
+        let current_token = self.get_token(0);
+        self.position += 1;
+        return Statement::input(current_token.text);
     }
 
     fn assignment_statement(&mut self) -> Statement {

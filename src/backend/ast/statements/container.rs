@@ -4,6 +4,9 @@ use std::fmt::{Display, Formatter, Result};
 
 pub enum StatementContainer {
     Void,
+    Input {
+        name: String
+    },
     Println {
         object: Expression
     },
@@ -15,7 +18,7 @@ pub enum StatementContainer {
         condition: Expression,
         if_statement: Statement,
         else_statement: Statement
-    }
+    },
 }
 
 impl Display for StatementContainer {
@@ -25,6 +28,9 @@ impl Display for StatementContainer {
         match self {
             Void => {
                 write!(f, "void")
+            },
+            Input { name } => {
+                write!(f, "input [into new] {name}")
             },
             Println { object } => {
                 write!(f, "println {object}")

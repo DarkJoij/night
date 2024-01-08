@@ -13,7 +13,7 @@ pub enum ExpressionType {
 }
 
 pub struct Expression {
-    expression_type: ExpressionType,
+    pub expression_type: ExpressionType,
     container: Box<ExpressionContainer>
 }
 

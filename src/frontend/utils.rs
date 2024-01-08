@@ -2,6 +2,7 @@ use crate::{spawn_al_error, spawn_read_error};
 
 use std::env::args;
 use std::fs::read;
+use std::io::{stdin, stdout, Write};
 use std::process::exit;
 
 pub struct Argv {
@@ -40,4 +41,17 @@ pub fn read_file(path: &String) -> Vec<u8> {
         },
         Err(_) => spawn_read_error!("Failed to read file: {path}.")
     }
+}
+
+pub fn read_universal_input(message: &str) -> String {
+    print!("{message}");
+    stdout().flush().unwrap();
+
+    let mut input = String::new();
+
+    stdin()
+        .read_line(&mut input)
+        .expect("failed to read line..."); // Cover by [`ub`].
+
+    input.trim().to_owned()
 }

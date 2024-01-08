@@ -1,4 +1,4 @@
-@! Prints passed objects to `stdout`.
+@! Reads from `stdin` and prints it to `stdout`.
 
-message = "Hello world"
-println message
+input x
+println x

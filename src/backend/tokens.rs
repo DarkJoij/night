@@ -32,6 +32,7 @@ pub enum TokenType {
     LeftParenthesis,
     RightParenthesis,
     // Reserved keywords:
+    Input,
     Println,
     IfKeyword,
     ElsIfKeyword,

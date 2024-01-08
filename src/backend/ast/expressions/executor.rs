@@ -67,14 +67,14 @@ impl<'a> ExpressionExecutor<'a> {
             Binary { operator, left, right } => {
                 let left_value = left.execute(self.driver)
                     .unwrap_to_f64();
-                let right_value = right.execute(self.driver)
+                let rvalue = right.execute(self.driver)
                     .unwrap_to_f64();
 
                 match operator.as_str() {
-                    "+" => left_value + right_value,
-                    "-" => left_value - right_value,
-                    "*" => left_value * right_value,
-                    "/" => left_value / right_value,
+                    "+" => left_value + rvalue,
+                    "-" => left_value - rvalue,
+                    "*" => left_value * rvalue,
+                    "/" => left_value / rvalue,
                     _ => spawn_operator_error!("Invalid operator: {}.", &operator)
                 }
             }
@@ -89,22 +89,22 @@ impl<'a> ExpressionExecutor<'a> {
         let string = match self.container {
             Atom { literal } => literal.clone(),
             Binary { operator, left, right } => {
-                let right_value = right.execute(self.driver);
-                let mut left_string = left.execute(self.driver)
+                let rvalue = right.execute(self.driver);
+                let mut lstring = left.execute(self.driver)
                     .unwrap_to_string();
 
                 match operator.as_str() {
                     "+" => {
-                        let right_string = right_value.unwrap_to_string();
-                        left_string.push_str(&right_string);
+                        let right_string = rvalue.unwrap_to_string();
+                        lstring.push_str(&right_string);
 
-                        left_string
+                        lstring
                     },
                     "*" => {
-                        let times = right_value.unwrap_to_f64();
-                        left_string.repeat(times as usize)
+                        let times = rvalue.unwrap_to_f64();
+                        lstring.repeat(times as usize)
                     },
-                    _ => left_string
+                    _ => lstring
                 }
             },
             _ => spawn_syntax_error!(
@@ -145,9 +145,9 @@ impl<'a> ExpressionExecutor<'a> {
                 use NightValue::*;
 
                 let left_value = left.execute(self.driver);
-                let right_value = right.execute(self.driver);
+                let rvalue = right.execute(self.driver);
 
-                if !arms_equals(&left_value, &right_value) {
+                if !arms_equals(&left_value, &rvalue) {
                     failed_to_apply(operator, "different types");
                 }
 
@@ -155,31 +155,31 @@ impl<'a> ExpressionExecutor<'a> {
                     Void => false,
                     Numeric(left_number) => {
                         match operator.as_str() {
-                            "<" => left_number < right_value.unwrap_to_f64(),
-                            ">" => left_number > right_value.unwrap_to_f64(),
-                            "<=" => left_number <= right_value.unwrap_to_f64(),
-                            ">=" => left_number >= right_value.unwrap_to_f64(),
-                            "==" => left_number == right_value.unwrap_to_f64(),
-                            "!=" => left_number != right_value.unwrap_to_f64(),
+                            "<" => left_number < rvalue.unwrap_to_f64(),
+                            ">" => left_number > rvalue.unwrap_to_f64(),
+                            "<=" => left_number <= rvalue.unwrap_to_f64(),
+                            ">=" => left_number >= rvalue.unwrap_to_f64(),
+                            "==" => left_number == rvalue.unwrap_to_f64(),
+                            "!=" => left_number != rvalue.unwrap_to_f64(),
                             _ => failed_to_apply(operator, "numbers")
                         }
                     },
-                    Literal(left_string) => {
+                    Literal(lstring) => {
                         match operator.as_str() {
                             // "<", ">", "<=" and ">=" must be covered.
-                            "==" => left_string == right_value.unwrap_to_string(),
-                            "!=" => left_string != right_value.unwrap_to_string(),
+                            "==" => lstring == rvalue.unwrap_to_string(),
+                            "!=" => lstring != rvalue.unwrap_to_string(),
                             _ => failed_to_apply(operator, "strings")
                         }
                     },
                     Boolean(left_boolean) => {
                         match operator.as_str() {
-                            "|" => left_boolean | right_value.unwrap_to_bool(),
-                            "&" => left_boolean & right_value.unwrap_to_bool(),
-                            "==" => left_boolean == right_value.unwrap_to_bool(),
-                            "!=" => left_boolean != right_value.unwrap_to_bool(),
-                            "||" => left_boolean || right_value.unwrap_to_bool(),
-                            "&&" => left_boolean && right_value.unwrap_to_bool(),
+                            "|" => left_boolean | rvalue.unwrap_to_bool(),
+                            "&" => left_boolean & rvalue.unwrap_to_bool(),
+                            "==" => left_boolean == rvalue.unwrap_to_bool(),
+                            "!=" => left_boolean != rvalue.unwrap_to_bool(),
+                            "||" => left_boolean || rvalue.unwrap_to_bool(),
+                            "&&" => left_boolean && rvalue.unwrap_to_bool(),
                             _ => failed_to_apply(operator, "booleans")
                         }
                     }

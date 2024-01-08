@@ -15,13 +15,17 @@ fn main() {
     let mut lexer = Lexer::new(&code, &line_manager);
     let tokens = lexer.lex();
 
-    // println!("Tokens:\n{tokens:#?}\n");
-
+    println!("Tokens:\n{tokens:#?}\n");
+     
     let mut driver = get_loaded_driver();
     let mut parser = Parser::new(&tokens, &line_manager);
     let statements = parser.parse();
 
     for statement in statements {
-        statement.execute(&mut driver)
+        let intermidate_result = statement.execute(&mut driver);
+        
+        if_daily! {
+            println!("{intermidate_result:?}");
+        }
     }
 }

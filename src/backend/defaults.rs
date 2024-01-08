@@ -6,8 +6,8 @@ pub const OPERATORS: [char; 12] = [
     '=', '(', ')', '+', '-', '*', '/', '<', '>', '!', '|', '&'
 ];
 
-pub const RESERVED_KEYWORDS: [&str; 6] = [
-    "if", "else", "elsif", "println", "true", "false",
+pub const RESERVED_KEYWORDS: [&str; 7] = [
+    "if", "else", "elsif", "input", "println", "true", "false",
 ];
 
 pub const COMPLEX_OPERATORS_ENDINGS: [char; 3] = [
@@ -27,6 +27,7 @@ pub fn define_identifier_type(buffer: &str) -> TokenType {
                 "if" => TokenType::IfKeyword,
                 "else" => TokenType::ElseKeyword,
                 "elsif" => TokenType::ElsIfKeyword,
+                "input" => TokenType::Input,
                 "println" => TokenType::Println,
                 "true" => TokenType::BooleanValue(true),
                 "false" => TokenType::BooleanValue(false),

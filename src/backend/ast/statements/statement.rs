@@ -1,5 +1,8 @@
 use crate::backend::ast::{Expression, StatementContainer};
-use crate::frontend::objects_driver::NightObjectsDriver;
+use crate::backend::parser::utils::IntermediateResult;
+use crate::frontend::objects_driver::{NightObjectsDriver, NightValue};
+use crate::frontend::utils::read_universal_input;
+use crate::ok_r;
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -12,11 +15,10 @@ impl Statement {
         Self::new(StatementContainer::Void)
     }
 
-    pub fn assignment(identifier: String, object: Expression) -> Self {
+    pub fn input(name: String) -> Self {
         Self::new(
-            StatementContainer::Assignment {
-                identifier,
-                object
+            StatementContainer::Input { 
+                name
             }
         )
     }
@@ -24,6 +26,15 @@ impl Statement {
     pub fn println(object: Expression) -> Self {
         Self::new(
             StatementContainer::Println {
+                object
+            }
+        )
+    }
+
+    pub fn assignment(identifier: String, object: Expression) -> Self {
+        Self::new(
+            StatementContainer::Assignment {
+                identifier,
                 object
             }
         )
@@ -43,26 +54,36 @@ impl Statement {
         )
     }
 
-    pub fn execute(&self, driver: &mut NightObjectsDriver) {
+    pub fn execute(&self, driver: &mut NightObjectsDriver) -> IntermediateResult {
         use StatementContainer::*;
 
         match self.container.as_ref() {
-            Void => (),
+            Void => ok_r!("Void expression passed."),
+            Input { name } => {
+                let input = read_universal_input(">>> "); // Fix messages!
+                let new_object = NightValue::Literal(input);
+
+                driver.insert(name.to_owned(), new_object.clone());
+                ok_r!("Successfully inserted `{name}` with value `{new_object}` into `NightObjectsDriver`.")
+            },
             Println { object } => {
-                println!("{}", object.execute(driver));
+                let rvalue = object.execute(driver);
+                println!("{}", &rvalue);
+
+                ok_r!("Successfully printed {} to `stdout`.", rvalue)
             },
             Assignment { identifier, object } => {
-                driver.insert(identifier.clone(), object.execute(driver));
+                let rvalue = object.execute(driver);
+                driver.insert(identifier.clone(), rvalue.clone());
+
+                ok_r!("Successfully assigned value `{rvalue}` to object with name `{identifier}`.")
             },
             IfElse { condition, if_statement, else_statement } => {
                 let condition_value = condition.execute(driver);
+                let executing = if condition_value.unwrap_to_bool() { if_statement } else { else_statement };
 
-                if condition_value.unwrap_to_bool() {
-                    if_statement.execute(driver);
-                }
-                else {
-                    else_statement.execute(driver);
-                }
+                ok_r!("Because condition were `{}` executed this expression `{}` with result: {:?}", 
+                    condition_value.unwrap_to_bool(), &executing, executing.execute(driver))
             }
         }
     }
